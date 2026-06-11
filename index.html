@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life Audit</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #0d0d0d;
+      color: #f0ece4;
+      font-family: 'Georgia', serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
+    .wrap { max-width: 560px; width: 100%; }
+    .badge {
+      display: inline-block;
+      letter-spacing: 0.2em;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      color: #888;
+      border: 1px solid #333;
+      padding: 4px 12px;
+      margin-bottom: 24px;
+    }
+    .intro { text-align: center; max-width: 520px; }
+    .intro h1 {
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .intro p { color: #999; font-size: 16px; line-height: 1.7; margin-bottom: 32px; }
+    .cat-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 40px; }
+    .cat-pill {
+      border: 1px solid;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+    .start-btn {
+      background: #f0ece4;
+      color: #0d0d0d;
+      border: none;
+      padding: 16px 40px;
+      font-size: 16px;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      margin-bottom: 16px;
+      display: block;
+      margin: 0 auto 16px;
+    }
+    .note { color: #555; font-size: 13px; }
+    .progress-bar { height: 2px; background: #1e1e1e; margin-bottom: 40px; border-radius: 2px; }
+    .progress-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+    .cat-header { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+    .cat-emoji { font-size: 28px; }
+    .cat-label { font-family: 'Courier New', monospace; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; flex: 1; }
+    .q-counter { color: #555; font-size: 13px; font-family: 'Courier New', monospace; }
+    .question-box { border: 1px solid; padding: 28px 24px; margin-bottom: 40px; border-radius: 2px; }
+    .question-text { font-size: clamp(17px, 3vw, 22px); line-height: 1.6; font-weight: 400; }
+    .scale-wrap { display: flex; gap: 12px; justify-content: center; margin-bottom: 12px; }
+    .scale-btn {
+      width: 52px; height: 52px;
+      border: 1px solid #2a2a2a;
+      border-radius: 2px;
+      color: #f0ece4;
+      font-size: 17px;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      background: transparent;
+      transition: all 0.2s ease;
+    }
+    .scale-btn:hover { border-color: #888; }
+    .scale-btn.selected { transform: scale(1.12); }
+    .scale-labels { display: flex; justify-content: space-between; color: #555; font-size: 11px; font-family: 'Courier New', monospace; }
+    .results-wrap { text-align: center; max-width: 620px; width: 100%; }
+    .results-title { font-size: 14px; font-family: 'Courier New', monospace; letter-spacing: 0.15em; color: #666; text-transform: uppercase; margin-bottom: 12px; font-weight: 400; }
+    .overall-score { display: flex; flex-direction: column; align-items: center; margin-bottom: 48px; }
+    .score-label { font-size: 22px; margin-top: 12px; letter-spacing: 0.05em; }
+    .breakdown { display: flex; flex-direction: column; gap: 16px; text-align: left; margin-bottom: 40px; }
+    .cat-card { border: 1px solid; padding: 20px 20px 16px; border-radius: 2px; }
+    .cat-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .cat-card-label { flex: 1; font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .cat-card-score { font-size: 22px; font-weight: 700; }
+    .cat-bar-bg { height: 3px; background: #1e1e1e; border-radius: 2px; margin-bottom: 8px; }
+    .cat-bar-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+    .cat-status { font-size: 12px; font-family: 'Courier New', monospace; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .improvements { margin-top: 14px; border-top: 1px solid #1e1e1e; padding-top: 14px; }
+    .improv-title { font-size: 11px; font-family: 'Courier New', monospace; color: #666; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+    .improv-tip { font-size: 13px; color: #bbb; line-height: 1.6; margin-bottom: 8px; display: flex; }
+    .improv-arrow { margin-right: 8px; flex-shrink: 0; }
+    .retake-btn {
+      background: transparent; border: 1px solid #333; color: #888;
+      padding: 12px 32px; font-size: 13px; font-family: 'Courier New', monospace;
+      cursor: pointer; letter-spacing: 0.1em; margin-bottom: 40px;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const categories = [
+  { id: "finance", label: "Finance", emoji: "💰", color: "#C9A84C", questions: ["I know exactly how much money I earn, spend, and save each month","I have at least 3 months of living expenses saved as an emergency fund","I am actively working toward a clear financial goal","I feel in control of my financial future","I am building income outside of my primary job"] },
+  { id: "career", label: "Career", emoji: "💼", color: "#6C8EBF", questions: ["I feel energised and engaged by the work I do day to day","My career is moving in a direction I have chosen, not just fallen into","I feel my skills are being used and developed","I can see a clear path to where I want to be in 3 years","I would choose this career again if I were starting from scratch"] },
+  { id: "health", label: "Health", emoji: "🏃", color: "#5BA85A", questions: ["I exercise in a way that genuinely makes me feel good at least 3 times a week","I sleep 7-8 hours consistently and wake up feeling rested","My diet gives me energy rather than draining it","I am not carrying chronic stress that is affecting my body","I feel physically capable of doing the things I want to do in life"] },
+  { id: "relationships", label: "Relationships", emoji: "❤️", color: "#C45C6A", questions: ["I have at least one person I can be completely honest with","My close relationships feel reciprocal and energising, not draining","I actively invest time in the people who matter most to me","I feel comfortable setting boundaries with people who drain me","I am not carrying unresolved conflict that is weighing on me"] },
+  { id: "mindset", label: "Mindset", emoji: "🧠", color: "#9B72CF", questions: ["I generally believe my situation can improve through my own actions","I handle setbacks without spiralling into extended negativity","I spend more time building my future than worrying about it","I feel a clear sense of purpose or direction in my life","I am not allowing fear of judgment to stop me from pursuing what I want"] },
+  { id: "freedom", label: "Freedom", emoji: "🌍", color: "#E07B39", questions: ["I feel I have genuine choice in how I spend my time","I am not trapped in situations purely out of financial obligation","I regularly do things that bring me joy outside of work","My lifestyle reflects my values, not just my circumstances","I feel like the author of my life, not a passenger in it"] }
+];
+
+const improvements = {
+  finance: ["Start tracking every expense for 30 days using a free app like Emma or YNAB","Open a separate savings account and automate a fixed transfer on payday","Identify one income stream you could test this month — freelancing, selling, consulting"],
+  career: ["Write down your ideal working life in detail — be specific about what you want to feel every day","Have one honest conversation this week about your career direction","Spend 30 minutes researching one alternative career path you have been curious about"],
+  health: ["Commit to one non-negotiable 20-minute movement per day for the next 2 weeks","Set a hard stop on screens 45 minutes before bed and protect your sleep","Cook at home 5 out of 7 nights this week and notice how your energy shifts"],
+  relationships: ["Reach out to one person you have been meaning to connect with and actually schedule something","Have one overdue honest conversation you have been avoiding","Audit your social circle — who leaves you energised vs drained, and adjust time accordingly"],
+  mindset: ["Start a daily 5-minute journal — one win, one thing you are grateful for, one intention","Identify the one fear that is most limiting you right now and write down its actual worst case","Read one book this month on mindset, growth, or someone who built what you want"],
+  freedom: ["Block one hour per week as non-negotiable personal time — protect it like a meeting","Write down what your ideal week looks like in granular detail","Identify the one change that would have the biggest impact on your sense of freedom and take one step toward it this week"]
+};
+
+function getScoreLabel(pct) {
+  if (pct >= 80) return { label: "Thriving", color: "#5BA85A" };
+  if (pct >= 60) return { label: "Growing", color: "#C9A84C" };
+  if (pct >= 40) return { label: "Surviving", color: "#E07B39" };
+  return { label: "Needs Attention", color: "#C45C6A" };
+}
+
+let state = { screen: "intro", catIndex: 0, qIndex: 0, answers: {} };
+
+function getCategoryScore(catId) {
+  const cat = categories.find(c => c.id === catId);
+  let total = 0;
+  cat.questions.forEach((_, i) => { total += state.answers[catId + "-" + i] || 0; });
+  return Math.round((total / (cat.questions.length * 4)) * 100);
+}
+
+function render() {
+  const app = document.getElementById("app");
+  if (state.screen === "intro") {
+    app.innerHTML = `
+      <div class="wrap intro">
+        <div class="badge">LIFE AUDIT</div>
+        <h1>How is your life<br/>actually going?</h1>
+        <p>30 questions across 6 areas of your life. Honest answers only.<br/>No judgment. Just clarity.</p>
+        <div class="cat-grid">
+          ${categories.map(c => `<div class="cat-pill" style="border-color:${c.color};color:${c.color}">${c.emoji} ${c.label}</div>`).join("")}
+        </div>
+        <button class="start-btn" onclick="startQuiz()">Start the Audit →</button>
+        <p class="note">Takes about 4 minutes. Be brutally honest.</p>
+      </div>`;
+  } else if (state.screen === "quiz") {
+    const cat = categories[state.catIndex];
+    const total = categories.reduce((a, c) => a + c.questions.length, 0);
+    const answered = Object.keys(state.answers).length;
+    const progress = (answered / total) * 100;
+    app.innerHTML = `
+      <div class="wrap">
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%;background:${cat.color}"></div></div>
+        <div class="cat-header">
+          <span class="cat-emoji">${cat.emoji}</span>
+          <span class="cat-label" style="color:${cat.color}">${cat.label}</span>
+          <span class="q-counter">${state.qIndex + 1} / ${cat.questions.length}</span>
+        </div>
+        <div class="question-box" style="border-color:${cat.color}44">
+          <p class="question-text">${cat.questions[state.qIndex]}</p>
+        </div>
+        <div class="scale-wrap">
+          ${[0,1,2,3,4].map(v => `<button class="scale-btn" style="border-color:${cat.color}" onclick="answer(${v})">${v+1}</button>`).join("")}
+        </div>
+        <div class="scale-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div>
+      </div>`;
+  } else {
+    const overall = Math.round(categories.reduce((a, c) => a + getCategoryScore(c.id), 0) / categories.length);
+    const ol = getScoreLabel(overall);
+    const circ = (overall / 100) * 327;
+    app.innerHTML = `
+      <div class="results-wrap">
+        <div class="badge">YOUR RESULTS</div>
+        <p class="results-title">Overall Score</p>
+        <div class="overall-score">
+          <svg viewBox="0 0 120 120" width="160" height="160">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#1a1a1a" stroke-width="10"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="${ol.color}" stroke-width="10" stroke-dasharray="${circ} 327" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+            <text x="60" y="55" text-anchor="middle" fill="white" font-size="26" font-weight="700" font-family="Georgia,serif">${overall}</text>
+            <text x="60" y="74" text-anchor="middle" fill="#888" font-size="11" font-family="Georgia,serif">out of 100</text>
+          </svg>
+          <div class="score-label" style="color:${ol.color}">${ol.label}</div>
+        </div>
+        <div class="breakdown">
+          ${categories.map(cat => {
+            const score = getCategoryScore(cat.id);
+            const sl = getScoreLabel(score);
+            return `<div class="cat-card" style="border-color:${cat.color}33">
+              <div class="cat-card-top">
+                <span style="font-size:22px">${cat.emoji}</span>
+                <span class="cat-card-label" style="color:${cat.color}">${cat.label}</span>
+                <span class="cat-card-score" style="color:${cat.color}">${score}</span>
+              </div>
+              <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${score}%;background:${cat.color}"></div></div>
+              <div class="cat-status" style="color:${sl.color}">${sl.label}</div>
+              ${score < 70 ? `<div class="improvements">
+                <div class="improv-title">What to focus on:</div>
+                ${improvements[cat.id].map(tip => `<div class="improv-tip"><span class="improv-arrow" style="color:${cat.color}">→</span>${tip}</div>`).join("")}
+              </div>` : ""}
+            </div>`;
+          }).join("")}
+        </div>
+        <button class="retake-btn" onclick="retake()">Retake Audit</button>
+      </div>`;
+  }
+}
+
+function startQuiz() { state.screen = "quiz"; render(); }
+
+function answer(val) {
+  const cat = categories[state.catIndex];
+  state.answers[cat.id + "-" + state.qIndex] = val;
+  if (state.qIndex < cat.questions.length - 1) {
+    state.qIndex++;
+  } else if (state.catIndex < categories.length - 1) {
+    state.catIndex++;
+    state.qIndex = 0;
+  } else {
+    state.screen = "results";
+  }
+  render();
+}
+
+function retake() {
+  state = { screen: "intro", catIndex: 0, qIndex: 0, answers: {} };
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
